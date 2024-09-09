@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Picture Naming</title>
+    <script src="./jspsych/jspsych.js"></script>
+    <script src="./jspsych/plugin-html-keyboard-response.js"></script>
+    <script src="./jspsych/plugin-image-keyboard-response.js"></script>
+    <script src="./jspsych/plugin-html-audio-response.js"></script>
+    <script src="./jspsych/plugin-initialize-microphone.js"></script>
+    <script src="./jspsych/plugin-preload.js"></script>
+    <link rel="stylesheet" href="jspsych/jspsych.css" />
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <script type="module" src="aprendizado.js"></script>
+  </head>
+  <body></body>
+  <script>
+    
+
+    // var timeline = [];
+
+    // var micTrial = {
+    //   type: jsPsychInitializeMicrophone,
+    // };
+    // timeline.push(micTrial);
+
+    // function createLearnTrial(imagePath, label1, label2) {
+    //   return {
+    //     type: jsPsychHtmlKeyboardResponse,
+    //     stimulus:
+    //       `<img src="${imagePath}" style="width: 200px; height: 200px">` +
+    //       `<h2>${label1}</h2>` +
+    //       `<h2>${label2}</h2>`,
+    //     choices: "ALL_KEYS",
+    //   };
+    // }
+
+    // function createTestTrial(imagePath, borderColor) {
+    //   return {
+    //     type: jsPsychHtmlAudioResponse,
+    //     stimulus: `<img src="${imagePath}" style="width: 200px; height: 200px; border: 10px solid ${borderColor}; padding: 10px">`,
+    //     allow_playback: true,
+    //   };
+    // }
+
+    // // Criando trials de aprendizado
+    // var learn1 = createLearnTrial("images/1.png", "MESA", "TABLE");
+    // var learn2 = createLearnTrial("images/2.png", "CADEIRA", "CHAIR");
+    // timeline.push(learn1);
+    // timeline.push(learn2);
+
+    // // Criando trials de teste
+    // var test1 = createTestTrial("images/1.png", "red");
+    // var test2 = createTestTrial("images/2.png", "blue");
+    // timeline.push(test1);
+    // timeline.push(test2);
+
+    // jsPsych.run(timeline);
+  </script>
+</html>
