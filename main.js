@@ -1,13 +1,18 @@
-import { praticeStimuli } from "./utils.js";
+import { praticeStimuli, loadExcelFile } from "./utils.js";
 
-// import orders
+// Carregar o arquivo XLSX
+function loadOrderData() {
 
-// Constants
+}
+
+loadExcelFile("orders.xlsx").then((orderData) => {
+  console.log(orderData); // Exibe os dados no console
+});
 
 // Initialize jsPsych
 const jsPsych = initJsPsych({
   show_progress_bar: true,
-  message_progress_bar: '',
+  message_progress_bar: "",
   on_finish: function () {
     jsPsych.data.displayData();
   },
@@ -56,23 +61,21 @@ function praticeTrial(image, label_en, label_pt) {
   };
 }
 
-function praticeTrials() {
-  let trials = praticeStimuli.map((item) => {
-    return {
-      type: jsPsychHtmlKeyboardResponse,
-      stimulus: `<img src="img/${item.image}">`,
-      choices: "ALL_KEYS",
-      prompt: `<h1>${item.word_en}</h1>` + `<h1>${item.word_pt}</h1>`,
-    };
-  });
-
-  return {
-    timeline: trials,
-    randomize_order: true,
-  };
-}
-
 // Test Trials
+function testTrial(trial) {
+  let filler = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: function () {
+      if (trial["LANGUAGE FILLER"] == "EN") {
+        return `<img src='img/${trial.FILLER}' style="border: 10px solid red;">`;
+      } else {
+        return `<img src='img/${trial.FILLER}' style="border: 10px solid blue">`;
+      }
+    },
+    choices: "ALL_KEYS",
+  };
+  return filler;
+}
 
 function thankTrial() {
   return {
@@ -87,16 +90,21 @@ async function runExperiment() {
   // Preload Assets
   timeline.push(preloadImages());
 
-  // Pratice Instructions 
-  timeline.push(praticeInstructions());
+  // Pratice Instructions
+  // timeline.push(praticeInstructions());
 
-  // Pratice Trials
-  praticeStimuli.forEach((item) => {
-    timeline.push(praticeTrial(item.image, item.word_en, item.word_pt));
-  });
+  // // Pratice Trials
+  // praticeStimuli.forEach((item) => {
+  //   timeline.push(praticeTrial(item.image, item.word_en, item.word_pt));
+  // });
 
   // Test Instructions
   timeline.push(testInstructions());
+
+  // Test Trials
+  orderData.array.forEach((trial) => {
+    testTrial(trial);
+  });
 
   // Thank Trial
   timeline.push(thankTrial());
