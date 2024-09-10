@@ -1,13 +1,40 @@
-import { praticeStimuli, loadExcelFile } from "./utils.js";
+import { praticeStimuli } from "./utils.js";
 
 // Carregar o arquivo XLSX
-function loadOrderData() {
+async function loadExcelFile(path) {
+  try {
+    const response = await fetch(path); // Carrega o arquivo
+    const data = await response.arrayBuffer(); // Converte para ArrayBuffer
+    const workbook = XLSX.read(data, { type: "array" }); // Lê o workbook
 
+    // Array para armazenar todos os dados
+    let allData = [];
+
+    // Itera por todas as planilhas
+    // workbook.SheetNames.forEach((sheetName) => {
+    //   const sheet = workbook.Sheets[sheetName]; // Pega cada planilha
+    //   const sheetData = XLSX.utils.sheet_to_json(sheet); // Converte a planilha em JSON
+    //   allData = allData.concat(sheetData); // Junta os dados da planilha no array
+    // });
+
+    // Primeira planilha
+    const sheet1 = workbook.Sheets[workbook.SheetNames[0]];
+    const sheetData1 = XLSX.utils.sheet_to_json(sheet1);
+    // console.log(sheetData1); // Exibe todos os dados das planilhas no console
+    return sheetData1;
+
+    return allData; // Retorna os dados combinados
+  } catch (error) {
+    console.error("Erro ao carregar o arquivo:", error);
+  }
 }
 
-loadExcelFile("orders.xlsx").then((orderData) => {
-  console.log(orderData); // Exibe os dados no console
-});
+function getImageHTML(image, language) {
+  const borderStyle = language === "BP" ? "10px solid red" : "10px solid blue";
+
+  // Retorna o HTML da imagem com a borda definida
+  return `<img src='img/${image}.png' style="border: ${borderStyle};">`;
+}
 
 // Initialize jsPsych
 const jsPsych = initJsPsych({
@@ -65,16 +92,32 @@ function praticeTrial(image, label_en, label_pt) {
 function testTrial(trial) {
   let filler = {
     type: jsPsychHtmlKeyboardResponse,
-    stimulus: function () {
-      if (trial["LANGUAGE FILLER"] == "EN") {
-        return `<img src='img/${trial.FILLER}' style="border: 10px solid red;">`;
-      } else {
-        return `<img src='img/${trial.FILLER}' style="border: 10px solid blue">`;
-      }
-    },
+    stimulus: getImageHTML(trial["FILLER"], trial["LANGUAGE FILLER"]),
     choices: "ALL_KEYS",
+    data: { trial: trial.TRIAL, condition: trial.CONDITION },
   };
-  return filler;
+
+  let picture1 = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: getImageHTML(
+      trial["EXPERIMENTALPICTURE1"],
+      trial["LANGUAGE EXPERIMENTAL PICTURE 1"]
+    ),
+    choices: "ALL_KEYS",
+    data: { trial: trial.TRIAL, condition: trial.CONDITION },
+  };
+
+  let picture2 = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: getImageHTML(
+      trial["EXPERIMENTALPICTURE2"],
+      trial["LANGUAGE EXPERIMENTAL PICTURE 2"]
+    ),
+    choices: "ALL_KEYS",
+    data: { trial: trial.TRIAL, condition: trial.CONDITION },
+  };
+
+  return [filler, picture1, picture2];
 }
 
 function thankTrial() {
@@ -86,6 +129,9 @@ function thankTrial() {
 
 async function runExperiment() {
   let timeline = [];
+
+  // Load excel Order Data
+  let orderData = await loadExcelFile("orders.xlsx");
 
   // Preload Assets
   timeline.push(preloadImages());
@@ -102,8 +148,8 @@ async function runExperiment() {
   timeline.push(testInstructions());
 
   // Test Trials
-  orderData.array.forEach((trial) => {
-    testTrial(trial);
+  orderData.forEach((trial) => {
+    timeline.push(...testTrial(trial));
   });
 
   // Thank Trial

@@ -1,31 +1,3 @@
-export async function loadExcelFile(path) {
-  try {
-    const response = await fetch(path); // Carrega o arquivo
-    const data = await response.arrayBuffer(); // Converte para ArrayBuffer
-    const workbook = XLSX.read(data, { type: "array" }); // Lê o workbook
-
-    // Array para armazenar todos os dados
-    let allData = [];
-
-    // Itera por todas as planilhas
-    // workbook.SheetNames.forEach((sheetName) => {
-    //   const sheet = workbook.Sheets[sheetName]; // Pega cada planilha
-    //   const sheetData = XLSX.utils.sheet_to_json(sheet); // Converte a planilha em JSON
-    //   allData = allData.concat(sheetData); // Junta os dados da planilha no array
-    // });
-
-    // Primeira planilha
-    const sheet1 = workbook.Sheets[workbook.SheetNames[0]];
-    const sheetData1 = XLSX.utils.sheet_to_json(sheet1);
-    // console.log(sheetData1); // Exibe todos os dados das planilhas no console
-    return sheetData1;
-
-    return allData; // Retorna os dados combinados
-  } catch (error) {
-    console.error("Erro ao carregar o arquivo:", error);
-  }
-}
-
 // Dados dos estímulos
 export const praticeStimuli = [
   { image: "PICTURE_1.png", word_en: "MOUSE", word_pt: "RATO" },
