@@ -41,6 +41,7 @@ const jsPsych = initJsPsych({
   show_progress_bar: true,
   message_progress_bar: "",
   on_finish: function () {
+    jsPsych.data.get().localSave("json", "mydata.json");
     jsPsych.data.displayData();
   },
 });
@@ -51,6 +52,13 @@ function preloadImages() {
   return {
     type: jsPsychPreload,
     images: images,
+  };
+}
+
+// Microphone Permission
+function microphonePermission() {
+  return {
+    type: jsPsychInitializeMicrophone,
   };
 }
 
@@ -88,35 +96,26 @@ function praticeTrial(image, label_en, label_pt) {
   };
 }
 
+// Single Test Trial
+function testTrial(trial, image, language) {
+  return {
+    type: jsPsychHtmlAudioResponse,
+    stimulus: getImageHTML(image, language),
+    recording_duration: 10_000, // ?Maximum recording duration
+    allow_playback: true, // !production,
+    done_button_label: "Done", // !production,
+    data: { trial: trial.TRIAL, condition: trial.CONDITION },
+  };
+}
+
 // Test Trials
-function testTrial(trial) {
-  let filler = {
-    type: jsPsychHtmlKeyboardResponse,
-    stimulus: getImageHTML(trial["FILLER"], trial["LANGUAGE FILLER"]),
-    choices: "ALL_KEYS",
-    data: { trial: trial.TRIAL, condition: trial.CONDITION },
-  };
+function testTrials(trial) {
+  let filler = testTrial(trial, trial["FILLER"], trial["LANGUAGE FILLER"]);
+  
+  let picture1 = testTrial(trial, trial["EXPERIMENTALPICTURE1"], trial["LANGUAGE EXPERIMENTAL PICTURE 1"]);
 
-  let picture1 = {
-    type: jsPsychHtmlKeyboardResponse,
-    stimulus: getImageHTML(
-      trial["EXPERIMENTALPICTURE1"],
-      trial["LANGUAGE EXPERIMENTAL PICTURE 1"]
-    ),
-    choices: "ALL_KEYS",
-    data: { trial: trial.TRIAL, condition: trial.CONDITION },
-  };
-
-  let picture2 = {
-    type: jsPsychHtmlKeyboardResponse,
-    stimulus: getImageHTML(
-      trial["EXPERIMENTALPICTURE2"],
-      trial["LANGUAGE EXPERIMENTAL PICTURE 2"]
-    ),
-    choices: "ALL_KEYS",
-    data: { trial: trial.TRIAL, condition: trial.CONDITION },
-  };
-
+  let picture2 = testTrial(trial, trial["EXPERIMENTALPICTURE2"], trial["LANGUAGE EXPERIMENTAL PICTURE 2"]);
+ 
   return [filler, picture1, picture2];
 }
 
@@ -136,6 +135,9 @@ async function runExperiment() {
   // Preload Assets
   timeline.push(preloadImages());
 
+  // Microphone Permission
+  timeline.push(microphonePermission());
+
   // Pratice Instructions
   // timeline.push(praticeInstructions());
 
@@ -149,7 +151,7 @@ async function runExperiment() {
 
   // Test Trials
   orderData.forEach((trial) => {
-    timeline.push(...testTrial(trial));
+    timeline.push(...testTrials(trial));
   });
 
   // Thank Trial

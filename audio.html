@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>jsPsych Audio Trial Example</title>
+    <script src="./jspsych/jspsych.js"></script>
+    <link rel="stylesheet" href="jspsych/jspsych.css" />
+    <script src="./jspsych/plugin-initialize-microphone.js"></script>
+    <script src="./jspsych/plugin-html-audio-response.js"></script>
+  </head>
+  <body>
+    <script>
+      // Initialize jsPsych
+      const jsPsych = initJsPsych({
+        on_finish: function () {
+          // jsPsych.data.get().localSave("json", "mydata.json");
+          jsPsych.data.displayData();
+        },
+      });
+
+      // Crie a timeline para armazenar os trials
+      let timeline = [];
+
+      // Permisão do Microfone
+      let initializeMicrophone = {
+        type: jsPsychInitializeMicrophone,
+      };
+
+      // Crie o trial usando o plugin html-audio-response
+      var trial = {
+        type: jsPsychHtmlAudioResponse,
+        stimulus:
+          "<p>Please speak aloud when ready and press done when finished.</p>",
+        recording_duration: 30_000, // Maximum recording duration
+        allow_playback: true, // Allow the recording to be played back
+        show_done_button: true, // Show the button to stop recording
+        done_button_label: "Done", // Customize the label if needed
+      };
+
+      // Adiciona o trial à timeline
+      timeline.push(initializeMicrophone);
+      timeline.push(trial);
+
+      // Inicie o experimento
+      jsPsych.run(timeline);
+    </script>
+  </body>
+</html>
