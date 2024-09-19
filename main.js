@@ -1,5 +1,6 @@
 import { praticeStimuli } from "./utils.js";
 
+
 // Constantes
 let max_recording_duration = 10_000; // Duração da gravação em milissegundos
 
@@ -14,18 +15,14 @@ async function loadExcelFile(path) {
     let allData = [];
 
     // Itera por todas as planilhas
-    // workbook.SheetNames.forEach((sheetName) => {
-    //   const sheet = workbook.Sheets[sheetName]; // Pega cada planilha
-    //   const sheetData = XLSX.utils.sheet_to_json(sheet); // Converte a planilha em JSON
-    //   allData = allData.concat(sheetData); // Junta os dados da planilha no array
-    // });
-
-    // Primeira planilha
-    const sheet1 = workbook.Sheets[workbook.SheetNames[0]];
-    const sheetData1 = XLSX.utils.sheet_to_json(sheet1);
-    return sheetData1;
+    workbook.SheetNames.forEach((sheetName) => {
+      const sheet = workbook.Sheets[sheetName]; // Pega cada planilha
+      const sheetData = XLSX.utils.sheet_to_json(sheet); // Converte a planilha em JSON
+      allData = allData.concat(sheetData); // Junta os dados da planilha no array
+    });
 
     return allData; // Retorna os dados combinados
+    
   } catch (error) {
     console.error("Erro ao carregar o arquivo:", error);
   }
@@ -44,7 +41,7 @@ const jsPsych = initJsPsych({
   show_progress_bar: true,
   message_progress_bar: "",
   on_finish: function () {
-    // jsPsych.data.get().localSave("json", "mydata.json");
+    jsPsych.data.get().localSave("json", "data.json"); 
     jsPsych.data.displayData();
   },
 });
@@ -165,13 +162,14 @@ function exampleTrial() {
   return {
     type: jsPsychHtmlAudioResponse,
     stimulus: getImageHTML("PICTURE_1", "BP"),
-    recording_duration: max_recording_duration, // ?Maximum recording duration
-    allow_playback: true, // !production,
-    done_button_label: "CONTINUE", // !production,
+    recording_duration: max_recording_duration,
+    allow_playback: true,
+    done_button_label: "CONTINUE",
     data: { trial: "EXAMPLE" },
   };
 }
 
+// Break Trial
 function breakTrial() {
   return {
     type: jsPsychHtmlKeyboardResponse,
@@ -185,9 +183,8 @@ function testTrial(trial, image, language) {
   return {
     type: jsPsychHtmlAudioResponse,
     stimulus: getImageHTML(image, language),
-    recording_duration: max_recording_duration, // ?Maximum recording duration
-    // allow_playback: true, // !production,
-    done_button_label: "CONTINUE", // !production,
+    recording_duration: max_recording_duration,
+    done_button_label: "CONTINUE",
     data: { trial: trial.TRIAL, condition: trial.CONDITION },
   };
 }
@@ -211,6 +208,7 @@ function testTrials(trial) {
   return [filler, picture1, picture2];
 }
 
+// Thank Trial
 function thankTrial() {
   return {
     type: jsPsychHtmlKeyboardResponse,
@@ -218,6 +216,7 @@ function thankTrial() {
   };
 }
 
+// Run Experiment
 async function runExperiment() {
   let timeline = [];
 
@@ -249,9 +248,8 @@ async function runExperiment() {
   orderData.forEach((trial) => {
     timeline.push(...testTrials(trial));
     trialCounter++;
-    // console.log(trialCounter);
     
-    if (trialCounter % 10 == 0) {
+    if (trialCounter == 50 || trialCounter == 100 || trialCounter == 150) {
       timeline.push(breakTrial());
     }
     
