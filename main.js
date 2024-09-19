@@ -33,10 +33,10 @@ async function loadExcelFile(path) {
 
 function getImageHTML(image, language) {
   // console.log(image)
-  const borderStyle = language === "BP" ? "10px solid red" : "10px solid blue";
+  const borderColor = language === "BP" ? "red" : "green";
 
   // Retorna o HTML da imagem com a borda definida
-  return `<img src='img/${image}.png' style="border: ${borderStyle};">`;
+  return `<img src='img/${image}.png' style="border: 10px solid ${borderColor};">`;
 }
 
 // Initialize jsPsych
@@ -44,7 +44,7 @@ const jsPsych = initJsPsych({
   show_progress_bar: true,
   message_progress_bar: "",
   on_finish: function () {
-    jsPsych.data.get().localSave("json", "mydata.json");
+    // jsPsych.data.get().localSave("json", "mydata.json");
     jsPsych.data.displayData();
   },
 });
@@ -132,15 +132,23 @@ function testInstructions() {
   let example = exampleTrial();
 
   let instructions3 = {
-    type: jsPsychHtmlKeyboardResponse,
+    type: jsPsychHtmlButtonResponse,
     stimulus:
       "<p>O treino acabou!</p>" +
       "<p>Você entendeu a tarefa ou quer treinar um pouco mais?</p>" +
       "<p>Aperte VOLTAR para repetir o treino ou CONTINUAR para iniciar a tarefa.</p>",
-    choices: "ALL_KEYS",
+    choices: ["VOLTAR", "CONTINUAR"],
   };
   
-  return [instructions1, instructions2, example, instructions3];
+  return {
+    timeline: [instructions1, instructions2, example, instructions3],
+    loop_function: function (data) {
+      if (parseInt(data.values()[3].response) === 0) {
+        return true;
+      } 
+      return false;
+    }
+  };
 }
 
 // Pratice Trials
@@ -149,19 +157,27 @@ function praticeTrial(image, label_en, label_pt) {
     type: jsPsychHtmlKeyboardResponse,
     stimulus: `<img src='img/${image}'>`,
     choices: "ALL_KEYS",
-    prompt: `<h2>${label_en}</h2>` + `<h2>${label_pt}</h2>`,
+    prompt: `<h2 class='red'>${label_en}</h2>` + `<h2 class='green'>${label_pt}</h2>`,
   };
 }
 
 function exampleTrial() {
   return {
     type: jsPsychHtmlAudioResponse,
-    stimulus: "<img src='img/1.png'>",
+    stimulus: getImageHTML("PICTURE_1", "BP"),
     recording_duration: max_recording_duration, // ?Maximum recording duration
     allow_playback: true, // !production,
     done_button_label: "CONTINUE", // !production,
     data: { trial: "EXAMPLE" },
   };
+}
+
+function breakTrial() {
+  return {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: "<p>Descanse um pouco!</p>",
+    choices: "ALL_KEYS",
+  }
 }
 
 // Single Test Trial
@@ -210,7 +226,6 @@ async function runExperiment() {
 
   // Suffle Order Data
   orderData = jsPsych.randomization.shuffle(orderData);
-  console.log(orderData);
 
   // Preload Assets
   timeline.push(preloadImages());
@@ -219,19 +234,27 @@ async function runExperiment() {
   timeline.push(microphonePermission());
 
   // Pratice Instructions
-  // timeline.push(...praticeInstructions());
+   timeline.push(...praticeInstructions());
 
   // Pratice Trials
-  // praticeStimuli.forEach((item) => {
-  //   timeline.push(praticeTrial(item.image, item.word_en, item.word_pt));
-  // });
+  praticeStimuli.forEach((item) => {
+    timeline.push(praticeTrial(item.image, item.word_en, item.word_pt));
+  });
 
   // Test Instructions
   timeline.push(testInstructions());
 
   // Test Trials
+  let trialCounter = 0;
   orderData.forEach((trial) => {
     timeline.push(...testTrials(trial));
+    trialCounter++;
+    // console.log(trialCounter);
+    
+    if (trialCounter % 10 == 0) {
+      timeline.push(breakTrial());
+    }
+    
   });
 
   // Thank Trial
