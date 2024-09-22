@@ -22,7 +22,7 @@ async function loadExcelFile(path) {
     });
 
     return allData; // Retorna os dados combinados
-    
+
   } catch (error) {
     console.error("Erro ao carregar o arquivo:", error);
   }
@@ -41,7 +41,7 @@ const jsPsych = initJsPsych({
   show_progress_bar: true,
   message_progress_bar: "",
   on_finish: function () {
-    jsPsych.data.get().localSave("json", "data.json"); 
+    jsPsych.data.get().filter({type: "test"}).localSave("json", "data.json"); 
     jsPsych.data.displayData();
   },
 });
@@ -185,7 +185,7 @@ function testTrial(trial, image, language) {
     stimulus: getImageHTML(image, language),
     recording_duration: max_recording_duration,
     done_button_label: "CONTINUE",
-    data: { trial: trial.TRIAL, condition: trial.CONDITION },
+    data: { type: "test", trial: trial.TRIAL, condition: trial.CONDITION },
   };
 }
 
@@ -236,7 +236,7 @@ async function runExperiment() {
    timeline.push(...praticeInstructions());
 
   // Pratice Trials
-  praticeStimuli.forEach((item) => {
+  praticeStimuli.slice(0, 4).forEach((item) => {
     timeline.push(praticeTrial(item.image, item.word_en, item.word_pt));
   });
 
@@ -245,14 +245,13 @@ async function runExperiment() {
 
   // Test Trials
   let trialCounter = 0;
-  orderData.forEach((trial) => {
+  orderData.slice(0,2).forEach((trial) => {
     timeline.push(...testTrials(trial));
     trialCounter++;
     
     if (trialCounter == 50 || trialCounter == 100 || trialCounter == 150) {
       timeline.push(breakTrial());
     }
-    
   });
 
   // Thank Trial
