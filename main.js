@@ -236,23 +236,23 @@ async function runExperiment() {
    timeline.push(...praticeInstructions());
 
   // Pratice Trials
-  praticeStimuli.slice(0, 4).forEach((item) => {
+  praticeStimuli.forEach((item) => {
     timeline.push(praticeTrial(item.image, item.word_en, item.word_pt));
-  });
+  });//!remover o slice
 
   // Test Instructions
   timeline.push(testInstructions());
 
   // Test Trials
   let trialCounter = 0;
-  orderData.slice(0,2).forEach((trial) => {
+  orderData.forEach((trial) => {
     timeline.push(...testTrials(trial));
     trialCounter++;
     
     if (trialCounter == 50 || trialCounter == 100 || trialCounter == 150) {
       timeline.push(breakTrial());
     }
-  });
+  });//!remover o slice
 
   // Thank Trial
   timeline.push(thankTrial());
