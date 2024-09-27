@@ -1,37 +1,31 @@
-import json
 import base64
-import os
+import json
 import sys
 
-def convert_base64_to_audio(json_file, output_dir):
-    os.makedirs(output_dir, exist_ok=True)
 
-    # Load the JSON file
-    with open(json_file, 'r') as f:
-        data = json.load(f)
+def decode_base64_to_mp3(json_filename):
+    # Load json file
+    with open(json_filename, "r") as json_file:
+        data = json.load(json_file)
 
-    # Loop over each object in the JSON
+    # Loop through each json object
     for i, obj in enumerate(data):
-        base64_audio = obj.get('response')
+        # Get the base64 string from the json object
+        base64_string = obj.get("response")
 
-        if base64_audio:
-            # Decode the base64 audio
-            audio_data = base64.b64decode(base64_audio)
+        # Decode the base64 string
+        audio_data = base64.b64decode(base64_string)
 
-            # Write the decoded audio to a file (e.g., .wav format)
-            output_file = f"{output_dir}/audio_{i}.wav"
-            with open(output_file, 'wb') as audio_file:
-                audio_file.write(audio_data)
+        # Write the decoded data to an MP3 file
+        with open(
+            f"{json_file[:-5]}_output/trial_{obj.get('trial')}_picture{i % 3}.mp3", "wb"
+        ) as mp3_file:
+            mp3_file.write(audio_data)
 
 if __name__ == "__main__":
-    # Check if the JSON file was passed as a command-line argument
     if len(sys.argv) != 2:
-        print("Usage: python3 decode.py <json_file>")
+        print("Usage: python decode_mp3.py <json_file>")
         sys.exit(1)
 
-    # Get the JSON file from command-line argument
-    json_file = sys.argv[1]
-    output_dir = f"{json_file[:5]}_output"
-
-    # Call the function to convert base64 to audio
-    convert_base64_to_audio(json_file, output_dir)
+    json_filename = sys.argv[1]
+    decode_base64_to_mp3(json_filename)
