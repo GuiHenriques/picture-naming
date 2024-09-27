@@ -1,9 +1,12 @@
 import base64
 import json
 import sys
-
+import os
 
 def decode_base64_to_mp3(json_filename):
+    output_dir = f"{json_filename[:-5]}_output"
+    os.makedirs(output_dir, exist_ok=True)
+
     # Load json file
     with open(json_filename, "r") as json_file:
         data = json.load(json_file)
@@ -18,7 +21,7 @@ def decode_base64_to_mp3(json_filename):
 
         # Write the decoded data to an MP3 file
         with open(
-            f"{json_file[:-5]}_output/trial_{obj.get('trial')}_picture{i % 3}.mp3", "wb"
+            f"{output_dir}/trial_{obj.get('trial')}_picture{i % 3}.mp3", "wb"
         ) as mp3_file:
             mp3_file.write(audio_data)
 
