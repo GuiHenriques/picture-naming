@@ -28,4 +28,4 @@ build/
 
 # Decode generated files
 output/
-data*/
+data*
