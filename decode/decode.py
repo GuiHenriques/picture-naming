@@ -38,14 +38,14 @@ def convert_base64_to_audio(json_file):
             # Extract trial number
             trial_number = obj.get("trial")
 
-            # Count from 0 to 2 for the audio output
+            # Count from 0 /home/gui/Downloads/data p04.jsonto 2 for the audio output
             count = i % 3  # This will cycle through 0, 1, 2
 
             # Save as a WAV file with the new naming convention
             output_file = f"{output_dir}/trial_{trial_number}_picture{count}.wav"
             audio_segment.export(output_file, format="wav")
 
-            print(f"Audio saved as {output_file} in standard format.")
+            print(f"Audio {output_file} saved.")
 
 
 if __name__ == "__main__":
