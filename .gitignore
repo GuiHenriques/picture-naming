@@ -6,7 +6,7 @@ npm-debug.log
 serve/
 
 # Virtual environment directories
-venv/
+audiovenv/
 ENV/
 env/
 .venv/
