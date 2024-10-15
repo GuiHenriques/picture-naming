@@ -4,10 +4,11 @@ import sys
 import csv
 
 # Constants
-SILENCE_THRESHOLD = -35  # dB (valor padrão a ser ajustado se o onset for zero)
+SILENCE_THRESHOLD = -35  # dB
 SECOND_SILENCE_THRESHOLD = -20  # Segundo limiar de silêncio, caso o primeiro falhe
 MIN_SILENCE_LEN = 300  # Duração mínima do silêncio para detectar o onset (em ms)
 
+BASE_DIR = "./output1" # Caminho para o diretório base
 
 def get_audio_files(directory):
     """Obtém todos os arquivos .wav no diretório especificado."""
@@ -44,7 +45,7 @@ def process_audio_files(audio_dir):
         onset_time = detect_onset(audio)
         threshold_used = SILENCE_THRESHOLD  # Armazenar o threshold usado
 
-        # Se o onset for zero ou não detectado, reprocessar com um limiar mais sensível (-20 dB)
+        # Se o onset for zero, reprocessar com um limiar mais sensível (-20 dB)
         if onset_time == 0:
             onset_time = detect_onset(audio, silence_thresh=SECOND_SILENCE_THRESHOLD)
             threshold_used = SECOND_SILENCE_THRESHOLD
@@ -69,22 +70,22 @@ def process_audio_files(audio_dir):
         writer.writerow(["file_name", "onset_time", "threshold_value"])  # Cabeçalhos
         writer.writerows(results_sorted)
 
-    print(f"Resultados salvos em {output_csv}")
+
+def process_all_folders(base_dir):
+    """Processa todas as subpastas dentro de `base_dir`."""
+    for folder in os.listdir(base_dir):
+        folder_path = os.path.join(base_dir, folder)
+        if os.path.isdir(folder_path):  # Verificar se é um diretório
+            print(f"Processando a pasta: {folder_path}")
+            process_audio_files(folder_path)
 
 
-# Verificar se o diretório foi passado como argumento via linha de comando
+# Iniciar o processamento das subpastas dentro do diretório pai
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Uso: python onset.py <diretório_dos_áudios>")
+    # Verificar se o diretório base existe
+    if not os.path.isdir(BASE_DIR):
+        print(f"Erro: O diretório '{BASE_DIR}' não existe.")
         sys.exit(1)
 
-    # O diretório com os arquivos de áudio será o primeiro argumento
-    AUDIO_DIR = sys.argv[1]
-
-    # Verificar se o diretório passado existe
-    if not os.path.isdir(AUDIO_DIR):
-        print(f"Erro: O diretório '{AUDIO_DIR}' não existe.")
-        sys.exit(1)
-
-    # Processar os arquivos de áudio e salvar os resultados
-    process_audio_files(AUDIO_DIR)
+    # Processar todas as subpastas e salvar os resultados
+    process_all_folders(BASE_DIR)
