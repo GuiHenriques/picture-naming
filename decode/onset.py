@@ -4,44 +4,47 @@ import sys
 import csv
 
 # Constants
-SILENCE_THRESHOLD = -35  # dB (testar entre -50 e -30)
+SILENCE_THRESHOLD = -35  # dB (valor padrão a ser ajustado se o onset for zero)
+SECOND_SILENCE_THRESHOLD = -20  # Segundo limiar de silêncio, caso o primeiro falhe
 MIN_SILENCE_LEN = 300  # Duração mínima do silêncio para detectar o onset (em ms)
-
-# Diretório contendo os arquivos de áudio
-AUDIO_DIR = "./output/data00"
-
-# Create 'onsets' folder if it doesn't exist
-folder_name = "onsets"
-os.makedirs(folder_name, exist_ok=True)
 
 
 def load_audio(file_path):
+    """Carrega o arquivo de áudio."""
     return AudioSegment.from_wav(file_path)
 
 
-def detect_onset(audio, silence_thresh=SILENCE_THRESHOLD, min_silence_len=MIN_SILENCE_LEN):
+def detect_onset(
+    audio, silence_thresh=SILENCE_THRESHOLD, min_silence_len=MIN_SILENCE_LEN
+):
+    """Detecta o início do áudio com base no limiar de silêncio."""
     chunks = silence.detect_nonsilent(
         audio, min_silence_len=min_silence_len, silence_thresh=silence_thresh
     )
     if chunks:
-        return chunks[0][0] / 1000  # Convert to seconds
+        return chunks[0][0] / 1000  # Converte para segundos
     return None
 
 
-# Obter todos os arquivos .wav no diretório especificado
-def get_audio_files(directory):
-    return [f for f in os.listdir(directory)]
-
-
-# Função principal para processar todos os arquivos e salvar em CSV
 def process_audio_files(audio_dir):
+    """Processa todos os arquivos de áudio no diretório e salva os resultados em um CSV."""
     audio_files = get_audio_files(audio_dir)
     results = []
 
     for file in audio_files:
         file_path = os.path.join(audio_dir, file)
         audio = load_audio(file_path)
+
+        # Detectar onset com o SILENCE_THRESHOLD padrão
         onset_time = detect_onset(audio)
+
+        # Se o onset for zero ou não detectado, reprocessar com um limiar mais sensível
+        if onset_time is None or onset_time == 0:
+            print(
+                f"Onset não detectado ou zero para {file}. Reprocessando com SILENCE_THRESHOLD = {SECOND_SILENCE_THRESHOLD}..."
+            )
+            onset_time = detect_onset(audio, silence_thresh=SECOND_SILENCE_THRESHOLD)
+
         results.append([file, onset_time])
 
     # Ordenar os resultados pelo nome do arquivo (alfabeticamente)
@@ -62,6 +65,11 @@ def process_audio_files(audio_dir):
         writer.writerows(results_sorted)
 
     print(f"Resultados salvos em {output_csv}")
+
+
+def get_audio_files(directory):
+    """Obtém todos os arquivos .wav no diretório especificado."""
+    return [f for f in os.listdir(directory) if f.endswith(".wav")]
 
 
 # Verificar se o diretório foi passado como argumento via linha de comando
