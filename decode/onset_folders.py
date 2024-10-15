@@ -1,39 +1,39 @@
-from pydub import AudioSegment, silence
 import os
-import sys
 import csv
+from pydub import AudioSegment, silence
+import sys
 
 # Constants
 SILENCE_THRESHOLD = -35  # dB (testar entre -50 e -30)
 MIN_SILENCE_LEN = 300  # Duração mínima do silêncio para detectar o onset (em ms)
 
-# Diretório contendo os arquivos de áudio
-AUDIO_DIR = "./output/data00"
-
-# Create 'onsets' folder if it doesn't exist
-folder_name = "onsets"
-os.makedirs(folder_name, exist_ok=True)
+# Diretório base fixo (sem passar por argumentos)
+BASE_DIR = "./output"
 
 
+# Função para carregar o áudio
 def load_audio(file_path):
     return AudioSegment.from_wav(file_path)
 
 
-def detect_onset(audio, silence_thresh=SILENCE_THRESHOLD, min_silence_len=MIN_SILENCE_LEN):
+# Função para detectar o onset
+def detect_onset(
+    audio, silence_thresh=SILENCE_THRESHOLD, min_silence_len=MIN_SILENCE_LEN
+):
     chunks = silence.detect_nonsilent(
         audio, min_silence_len=min_silence_len, silence_thresh=silence_thresh
     )
     if chunks:
-        return chunks[0][0] / 1000  # Convert to seconds
+        return chunks[0][0] / 1000  # Converter para segundos
     return None
 
 
 # Obter todos os arquivos .wav no diretório especificado
 def get_audio_files(directory):
-    return [f for f in os.listdir(directory)]
+    return [f for f in os.listdir(directory) if f.endswith(".wav")]
 
 
-# Função principal para processar todos os arquivos e salvar em CSV
+# Função principal para processar todos os arquivos em uma pasta e salvar em CSV
 def process_audio_files(audio_dir):
     audio_files = get_audio_files(audio_dir)
     results = []
@@ -55,7 +55,7 @@ def process_audio_files(audio_dir):
     folder_name = os.path.basename(os.path.normpath(audio_dir))
     output_csv = os.path.join(output_folder, f"{folder_name}.csv")
 
-    # Salvar os resultados em um arquivo CSV
+    # Salvar os resultados ordenados em um arquivo CSV
     with open(output_csv, mode="w", newline="") as file:
         writer = csv.writer(file)
         writer.writerow(["file_name", "onset_time"])  # Cabeçalhos
@@ -64,19 +64,21 @@ def process_audio_files(audio_dir):
     print(f"Resultados salvos em {output_csv}")
 
 
-# Verificar se o diretório foi passado como argumento via linha de comando
+# Função para processar todas as subpastas dentro de um diretório
+def process_all_folders(base_dir):
+    # Iterar sobre todas as subpastas em `base_dir`
+    for folder in os.listdir(base_dir):
+        folder_path = os.path.join(base_dir, folder)
+        if os.path.isdir(folder_path):  # Verificar se é um diretório
+            print(f"Processando a pasta: {folder_path}")
+            process_audio_files(folder_path)
+
+
+# Verificar se o diretório base existe
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Uso: python onset.py <diretório_dos_áudios>")
+    if not os.path.isdir(BASE_DIR):
+        print(f"Erro: O diretório base '{BASE_DIR}' não existe.")
         sys.exit(1)
 
-    # O diretório com os arquivos de áudio será o primeiro argumento
-    AUDIO_DIR = sys.argv[1]
-
-    # Verificar se o diretório passado existe
-    if not os.path.isdir(AUDIO_DIR):
-        print(f"Erro: O diretório '{AUDIO_DIR}' não existe.")
-        sys.exit(1)
-
-    # Processar os arquivos de áudio e salvar os resultados
-    process_audio_files(AUDIO_DIR)
+    # Processar todas as subpastas dentro do diretório base
+    process_all_folders(BASE_DIR)
