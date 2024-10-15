@@ -19,7 +19,7 @@ def load_audio(file_path):
     return AudioSegment.from_wav(file_path)
 
 
-def detect_onset(audio, silence_thresh=SILENCE_THRESHOLD, min_silence_len=100):
+def detect_onset(audio, silence_thresh=SILENCE_THRESHOLD, min_silence_len=MIN_SILENCE_LEN):
     chunks = silence.detect_nonsilent(
         audio, min_silence_len=min_silence_len, silence_thresh=silence_thresh
     )
@@ -44,6 +44,9 @@ def process_audio_files(audio_dir):
         onset_time = detect_onset(audio)
         results.append([file, onset_time])
 
+    # Ordenar os resultados pelo nome do arquivo (alfabeticamente)
+    results_sorted = sorted(results, key=lambda x: x[0])
+
     # Criar o diretório de saída 'onsets'
     output_folder = os.path.join(os.getcwd(), "onsets")
     os.makedirs(output_folder, exist_ok=True)
@@ -56,7 +59,7 @@ def process_audio_files(audio_dir):
     with open(output_csv, mode="w", newline="") as file:
         writer = csv.writer(file)
         writer.writerow(["file_name", "onset_time"])  # Cabeçalhos
-        writer.writerows(results)
+        writer.writerows(results_sorted)
 
     print(f"Resultados salvos em {output_csv}")
 
