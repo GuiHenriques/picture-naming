@@ -8,7 +8,7 @@ SILENCE_THRESHOLD = -35  # dB
 SECOND_SILENCE_THRESHOLD = -20  # Segundo limiar de silêncio, caso o primeiro falhe
 MIN_SILENCE_LEN = 300  # Duração mínima do silêncio para detectar o onset (em ms)
 
-BASE_DIR = "./output1" # Caminho para o diretório base
+BASE_DIR = "./output" # Caminho para o diretório base
 
 def get_audio_files(directory):
     """Obtém todos os arquivos .wav no diretório especificado."""
