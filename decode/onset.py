@@ -2,6 +2,7 @@ from pydub import AudioSegment, silence
 import os
 import sys
 import csv
+import re
 
 # Constants
 SILENCE_THRESHOLD = -35  # dB
@@ -31,6 +32,26 @@ def detect_onset(audio, silence_thresh=SILENCE_THRESHOLD):
         return chunks[0][0] / 1000  # Converte para segundos
     return None
 
+def get_condition(file):
+    """ Retorna a condição com base no número do trial"""
+    conditions = {
+        1: range(1, 40),
+        2: range(81, 120),
+        3: range(121, 160),
+        4: range(41, 80),
+        5: range(161, 200)
+    }
+    
+    match = re.search(r'trial_(\d+)_', file)
+    if match:
+        trial_number = int(match.group(1))
+
+        for condition, trial_range in conditions.items():
+            if trial_number in trial_range:
+                return condition
+            
+        raise ValueError(f"Trial number {trial_number} is invalid.")
+
 
 def process_audio_files(audio_dir):
     """Processa todos os arquivos de áudio no diretório e salva os resultados em um CSV."""
@@ -50,8 +71,11 @@ def process_audio_files(audio_dir):
             onset_time = detect_onset(audio, silence_thresh=SECOND_SILENCE_THRESHOLD)
             threshold_used = SECOND_SILENCE_THRESHOLD
 
+        # Obter a condição
+        condition = get_condition(file)
+
         # Adicionar o resultado à lista, incluindo o threshold usado
-        results.append([file, onset_time, threshold_used])
+        results.append([file,onset_time, threshold_used, condition])
 
     # Ordenar os resultados pelo nome do arquivo (alfabeticamente)
     results_sorted = sorted(results, key=lambda x: x[0])
@@ -67,7 +91,7 @@ def process_audio_files(audio_dir):
     # Salvar os resultados em um arquivo CSV
     with open(output_csv, mode="w", newline="") as file:
         writer = csv.writer(file)
-        writer.writerow(["file_name", "onset_time", "threshold_value"])  # Cabeçalhos
+        writer.writerow(["file_name", "onset_time", "threshold_value", "condition"])  # Cabeçalhos
         writer.writerows(results_sorted)
 
 
