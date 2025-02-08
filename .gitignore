@@ -10,6 +10,7 @@ audiovenv/
 ENV/
 env/
 .venv/
+venv/
 
 # Temporary files
 tmp/
