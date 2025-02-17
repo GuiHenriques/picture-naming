@@ -35,11 +35,11 @@ def detect_onset(audio, silence_thresh=SILENCE_THRESHOLD):
 def get_condition(file):
     """ Retorna a condição com base no número do trial"""
     conditions = {
-        1: range(1, 40),
-        2: range(81, 120),
-        3: range(121, 160),
-        4: range(41, 80),
-        5: range(161, 200)
+        1: range(1, 40 + 1),
+        2: range(81, 120 + 1),
+        3: range(121, 160 + 1),
+        4: range(41, 80 + 1),
+        5: range(161, 200 + 1)
     }
     
     match = re.search(r'trial_(\d+)_', file)
