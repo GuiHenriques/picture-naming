@@ -47,6 +47,35 @@ const jsPsych = initJsPsych({
   },
 });
 
+// Permite avançar as telas de teclado também com clique ou toque (celular).
+// O toque só passa a valer depois de TAP_DELAY ms, para evitar pular a tela sem querer.
+const TAP_DELAY = 500;
+
+function tapToContinue() {
+  let timer = null;
+  let startTime = 0;
+
+  const advance = () => {
+    jsPsych.pluginAPI.cancelAllKeyboardResponses();
+    jsPsych.pluginAPI.clearAllTimeouts();
+    jsPsych.getDisplayElement().innerHTML = "";
+    jsPsych.finishTrial({ rt: Math.round(performance.now() - startTime), response: "tap" });
+  };
+
+  return {
+    on_load: () => {
+      startTime = performance.now();
+      timer = setTimeout(() => {
+        document.addEventListener("click", advance, { once: true });
+      }, TAP_DELAY);
+    },
+    on_finish: () => {
+      clearTimeout(timer);
+      document.removeEventListener("click", advance);
+    },
+  };
+}
+
 // Preload
 function preloadImages() {
   let images = praticeStimuli.map((item) => "img/" + item.image);
@@ -71,8 +100,9 @@ function praticeInstructions() {
       "<p>Bem vinda(o)!</p>" +
       "<p>Primeiramente gostaria de te agradecer mais uma vez por aceitar o convite para participar do meu estudo de doutorado!</p>" +
       "<p> Antes de começar vou te mostrar um passo a passo de tudo que você já fez e ainda vai fazer aqui hoje.</h4>" +
-      "<p>Pressione qualquer tecla para continuar</h4>",
+      "<p>Pressione qualquer tecla ou toque na tela para continuar</p>",
     choices: "ALL_KEYS",
+    ...tapToContinue(),
   };
 
   let instruction2 = {
@@ -83,8 +113,9 @@ function praticeInstructions() {
       "<p>2. Além disso, você já respondeu a três questionários e fez um teste online de proficiência na língua inglesa. Muito obrigada!" +
       "<p>3. Agora você vai fazer duas tarefas: uma tarefa de nomeação de figuras e uma tarefa de controle cognitivo. Não se preocupe, você poderá fazer uma pausa entre uma tarefa e outra." +
       "<p>4. Antes de cada tarefa você lerá outras explicações sobre o que fazer e terá oportunidade de praticar." +
-      "<p>5. Vamos lá? Aperte a tecla ESPAÇO para entrar na primeira tarefa.</p>",
+      "<p>5. Vamos lá? Aperte a tecla ESPAÇO ou toque na tela para entrar na primeira tarefa.</p>",
     choices: "ALL_KEYS",
+    ...tapToContinue(),
   };
 
   let instruction3 = {
@@ -96,8 +127,9 @@ function praticeInstructions() {
       "<p> Quando a figura estiver dentro de uma moldura <span class='green'>VERDE</span> você deve dizer o nome dela em <span class='green'>PORTUGUÊS</span>,\
       quando ela estiver em uma moldura <span class='red'>VERMELHA</span> você deve fizer o nome dela em <span class='red'>INGLÊS</span>. " +
       "<p>Agora, antes de começar a tarefa, eu vou te apresentar todas as figuras que você verá e os nomes delas em  <span class='green'>PORTUGUÊS</span> e <span class='red'>INGLÊS</span>.</p>" +
-      "<p>Aperte a tecla ESPAÇO para passar para a próxima imagem. Vamos lá?</p>",
+      "<p>Aperte a tecla ESPAÇO ou toque na tela para passar para a próxima imagem. Vamos lá?</p>",
     choices: "ALL_KEYS",
+    ...tapToContinue(),
   };
 
   return [instruction1, instruction2, instruction3];
@@ -114,8 +146,9 @@ function testInstructions() {
       "<p>Quando a figura estiver dentro de uma moldura <span class='green'>VERDE</span> você deve dizer o nome dela em <span class='green'>PORTUGUÊS</span>,\
       quando ela estiver em uma moldura <span class='red'>VERMELHA</span> você deve fizer o nome dela em <span class='red'>INGLÊS</span>." +
       "<p>Tente não falar muito baixo para que não corramos o risco do microfone não captar o sua voz, ok?</p>" +
-      "<p>Aperte ESPAÇO para ver um exemplo.</p>",
+      "<p>Aperte ESPAÇO ou toque na tela para ver um exemplo.</p>",
     choices: "ALL_KEYS",
+    ...tapToContinue(),
   };
 
   let instructions2 = {
@@ -125,6 +158,7 @@ function testInstructions() {
       "<p>Lembre-se, quando a imagem aparecer em um moldura <span class='green'>VERDE</span> você deve dizer o nome dela em <span class='green'>PORTUGUÊS</span> e quando a imagem aparecer em um moldura <span class='red'>VERMELHA</span> você deve dizer o nome dela em <span class='red'>INGLÊS</span>." +
       "<p>Aperte CONTINUE quando terminar de falar.</p>",
     choices: "ALL_KEYS",
+    ...tapToContinue(),
   };
 
   let example = exampleTrial();
@@ -155,6 +189,7 @@ function praticeTrial(image, label_en, label_pt) {
     type: jsPsychHtmlKeyboardResponse,
     stimulus: `<img src='img/${image}'>`,
     choices: "ALL_KEYS",
+    ...tapToContinue(),
     prompt: `<h2 class='red'>${label_en}</h2>` + `<h2 class='green'>${label_pt}</h2>`,
   };
 }
@@ -174,8 +209,11 @@ function exampleTrial() {
 function breakTrial() {
   return {
     type: jsPsychHtmlKeyboardResponse,
-    stimulus: "<p>Descanse um pouco!</p>",
+    stimulus:
+      "<p>Descanse um pouco!</p>" +
+      "<p>Quando estiver pronta(o), aperte qualquer tecla ou toque na tela para continuar.</p>",
     choices: "ALL_KEYS",
+    ...tapToContinue(),
   }
 }
 
@@ -214,6 +252,7 @@ function thankTrial() {
   return {
     type: jsPsychHtmlKeyboardResponse,
     stimulus: "<p>Obrigado!</p>",
+    ...tapToContinue(),
   };
 }
 

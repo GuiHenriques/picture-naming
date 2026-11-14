@@ -7,3 +7,38 @@
     color: red;
     font-weight: 900;
 }
+/* Celular e telas pequenas */
+img {
+    max-width: 100%;
+    max-height: 60vh;
+    box-sizing: border-box;
+}
+
+@media (max-width: 600px) {
+    .jspsych-content {
+        max-width: 100%;
+        padding: 0 16px;
+        box-sizing: border-box;
+        font-size: 16px;
+    }
+
+    .jspsych-content h2 {
+        font-size: 1.3rem;
+    }
+
+    .jspsych-btn {
+        padding: 12px 20px;
+        font-size: 16px;
+    }
+}
+
+/* Toque: sem atraso de duplo toque/zoom e sem menu de "salvar imagem" ao segurar */
+html, body {
+    touch-action: manipulation;
+}
+
+img {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
