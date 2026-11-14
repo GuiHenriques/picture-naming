@@ -42,3 +42,22 @@ img {
     -webkit-user-select: none;
     user-select: none;
 }
+
+/* Celular na horizontal: pede para virar o aparelho de pé */
+@media (orientation: landscape) and (pointer: coarse) and (max-height: 500px) {
+    body::after {
+        content: "Por favor, gire o celular para a posição vertical.";
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        text-align: center;
+        font-size: 1.3rem;
+        font-weight: 600;
+        background: #fff;
+        color: #333;
+    }
+}

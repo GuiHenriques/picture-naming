@@ -42,6 +42,10 @@ const jsPsych = initJsPsych({
   show_progress_bar: true,
   message_progress_bar: "",
   on_finish: function () {
+    // Sai da tela cheia (celular) antes de baixar os dados
+    if (document.fullscreenElement && document.exitFullscreen) {
+      document.exitFullscreen();
+    }
     jsPsych.data.get().filter({type: "test"}).localSave("json", "data.json"); 
     jsPsych.data.displayData();
   },
@@ -82,6 +86,29 @@ function preloadImages() {
   return {
     type: jsPsychPreload,
     images: images,
+  };
+}
+
+// Tela cheia: só em celular/tablet (tela de toque) e em navegadores que suportam.
+// No iPhone o Safari não permite tela cheia em páginas, então a etapa é pulada.
+function isTouchDevice() {
+  return window.matchMedia("(pointer: coarse)").matches;
+}
+
+function fullscreenTrial() {
+  return {
+    timeline: [
+      {
+        type: jsPsychFullscreen,
+        fullscreen_mode: true,
+        message:
+          "<p>A tarefa será exibida em tela cheia.</p>" +
+          "<p>Toque no botão abaixo para continuar.</p>",
+        button_label: "Continuar",
+        delay_after: 300,
+      },
+    ],
+    conditional_function: () => isTouchDevice() && document.fullscreenEnabled === true,
   };
 }
 
@@ -268,6 +295,9 @@ async function runExperiment() {
 
   // Preload Assets
   timeline.push(preloadImages());
+
+  // Tela cheia no celular
+  timeline.push(fullscreenTrial());
 
   // Microphone Permission
   timeline.push(microphonePermission());
