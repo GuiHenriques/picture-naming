@@ -30,7 +30,8 @@ async function loadExcelFile(path) {
 
 function getImageHTML(image, language) {
   // console.log(image)
-  const borderColor = language === "BP" ? "red" : "green";
+  // Verde = português (BP), vermelho = inglês (EN), conforme as instruções
+  const borderColor = language === "BP" ? "green" : "red";
 
   // Retorna o HTML da imagem com a borda definida
   return `<img src='img/${image}.png' style="border: 10px solid ${borderColor};">`;
